@@ -45,3 +45,25 @@ module_facet alloy.c.o mod : FilePath := do
   let cJob ← fetch <| mod.facet `alloy.c
   let weakArgs := #["-I", (← getLeanIncludeDir).toString]
   buildO s!"{mod.name} alloy" oFile cJob weakArgs mod.leancArgs "cc"
+
+module_facet alloy.cpp mod : FilePath := do
+  let exeJob ← alloy.fetch
+  let modJob ← mod.olean.fetch
+  let cppFile := mod.irPath "alloy.cpp"
+  exeJob.bindAsync fun exeFile exeTrace => do
+  modJob.bindSync fun _ modTrace => do
+    let depTrace := exeTrace.mix modTrace
+    let trace ← buildFileUnlessUpToDate cppFile depTrace do
+      logStep s!"Generating {mod.name} alloy"
+      proc {
+        cmd := exeFile.toString
+        args := #[mod.name.toString, cppFile.toString]
+        env := #[("LEAN_PATH", (← getLeanPath).toString)]
+      }
+    return (cppFile, trace)
+
+module_facet alloy.cpp.o mod : FilePath := do
+  let oFile := mod.irPath "alloy.cpp.o"
+  let cJob ← fetch <| mod.facet `alloy.cpp
+  let weakArgs := #["-I", (← getLeanIncludeDir).toString, "-v"]
+  buildO s!"{mod.name} alloy" oFile cJob weakArgs mod.leancArgs "clang++"
