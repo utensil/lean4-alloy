@@ -264,6 +264,32 @@ A C [functional call][1] expression.
 syntax:1000 cExpr:1000 "(" cExpr,* ")" : cExpr
 
 /--
+
+A C++ [new][1] expression.
+
+[1]: https://en.cppreference.com/w/cpp/language/new
+
+Supports only: `new S`.
+
+TODO: Move to Cpp module, and include all new variants.
+
+-/
+syntax:1000 "new" type : cExpr
+
+/--
+
+A C++ [delete][1] expression.
+
+[1]: https://en.cppreference.com/w/cpp/language/delete
+
+Supports only: `delete (S*)ptr`.
+
+TODO: Move to Cpp module, and include all delete variants.
+
+-/
+syntax:1000 "delete" cExpr:1000 : cExpr
+
+/--
 A C [member access][1] expression.
 
 [1]: https://en.cppreference.com/w/c/language/operator_member_access#Member_access
