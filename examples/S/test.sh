@@ -9,3 +9,5 @@ $LAKE build Test -v
 #   Expected in:     <9932BC93-8D2E-309F-BE82-45392DF49A77> ~/.elan/toolchains/leanprover--lean4---4.1.0/lib/libLLVM.dylib
 
 # $LAKE exe clangp
+
+./build/bin/clangp
