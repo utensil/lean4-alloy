@@ -42,8 +42,8 @@ alloy c section
 
 typedef CXIndex Index;
 
-static void CXIndex_foreach(void* ptr, b_lean_obj_arg f) {
-  lean_apply_1(f, ptr);
+static inline void noop_foreach(void *mod, b_lean_obj_arg fn) {
+  -- do nothing since all types in Libclang do not contain nested Lean objects
 }
 
 static void CXIndex_finalize(void* ptr) {
@@ -53,7 +53,7 @@ static void CXIndex_finalize(void* ptr) {
 end
 
 alloy c extern_type Index => Index := {
-  foreach := `CXIndex_foreach
+  foreach := `noop_foreach
   finalize := `CXIndex_finalize
 }
 
@@ -76,7 +76,7 @@ static void CXTranslationUnit_finalize(void* ptr) {
 end
 
 alloy c extern_type TranslationUnit => TranslationUnit := {
-  foreach := `CXTranslationUnit_foreach
+  foreach := `noop_foreach
   finalize := `CXTranslationUnit_finalize
 }
 
