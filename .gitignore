@@ -1,2 +1,3 @@
 /build
 /lakefile.olean
+examples/Libclang/mock.cpp.tu
