@@ -9,6 +9,7 @@ package Cpp where
   -- weakLeanArgs := #[
   --   -- s!"--load-dynlib={__dir__}/build/lib/" ++ nameToSharedLib "xxx",
   -- ]
+  moreLinkArgs := #["-lstdc++"]
 
 require alloy from ".."/".."
 
