@@ -42,6 +42,18 @@ jobs:
         curl -O --location https://raw.githubusercontent.com/leanprover/elan/master/elan-init.ps1
         .\elan-init.ps1 -NoPrompt 1 -DefaultToolchain none
         echo "$HOME\.elan\bin" >> $env:GITHUB_PATH
+    - name: package install
+      run: |
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          sudo apt update
+          sudo apt install -y curl wget git clang lld libc++-dev
+        elif [[ "${{ runner.os }}" == "macOS" ]]; then
+          echo "Running on macOS"
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "Running on Windows"
+        else
+          echo "Unsupported OS"
+        fi
     - name: Checkout
       uses: actions/checkout@v2
     - name: Check Lean
