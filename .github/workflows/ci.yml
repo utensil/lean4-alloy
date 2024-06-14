@@ -75,13 +75,8 @@ jobs:
       with:
         path-type: inherit
         install: >-
-          git
           base-devel
-          mingw-w64-clang-x86_64-libtool
-          mingw-w64-clang-x86_64-clang
-          mingw-w64-clang-x86_64-toolchain
-          mingw-w64-clang-x86_64-lld
-          mingw-w64-clang-x86_64-gmp
+          mingw-w64-x86_64-clang
     - name: Test (Windows)
       if: matrix.os == 'windows-latest'
       shell: msys2 {0}
