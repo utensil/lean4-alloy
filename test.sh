@@ -14,6 +14,14 @@ pushd examples/S
 ./test.sh
 popd
 
+pushd examples/Libclang
+./test.sh
+popd
+
+pushd examples/Cpp
+./test.sh
+popd
+
 pushd tests/compile
 ./test.sh
 popd

@@ -3,7 +3,7 @@ open Lake DSL
 
 package Libclang where
   buildType := .debug
-  moreLinkArgs := #[s!"-L{__dir__}/build/lib", s!"-L/opt/homebrew/opt/llvm/lib", "-lclang"]
+  moreLinkArgs := #[s!"-L{__dir__}/.lake/build/lib", s!"-L/opt/homebrew/opt/llvm/lib", "-lclang"]
   weakLeanArgs := #[
     s!"--load-dynlib=/opt/homebrew/opt/llvm/lib/" ++ nameToSharedLib "LLVM",
     s!"--load-dynlib=/opt/homebrew/opt/llvm/lib/" ++ nameToSharedLib "clang"
