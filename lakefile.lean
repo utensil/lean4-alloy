@@ -68,7 +68,7 @@ module_facet alloy.cpp mod : FilePath := do
 @[inline] def buildAlloyCppO (mod : Module) (shouldExport : Bool) : FetchM (BuildJob FilePath) := do
   let oFile := mod.irPath s!"alloy.cpp.o.{if shouldExport then "export" else "noexport"}"
   let cJob ← fetch <| mod.facet `alloy.cpp
-  let weakArgs := #["-I", (← getLeanIncludeDir).toString, "-v"] ++ mod.weakLeancArgs
+  let weakArgs := #["-I", (← getLeanIncludeDir).toString] ++ mod.weakLeancArgs -- , "-v"
   let cc := (← IO.getEnv "CXX").getD "clang++"
   let leancArgs := if shouldExport then mod.leancArgs.push "-DLEAN_EXPORTING" else mod.leancArgs
   buildO oFile cJob weakArgs leancArgs cc

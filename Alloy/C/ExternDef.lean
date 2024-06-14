@@ -80,4 +80,4 @@ elab_rules : command
   let cmd ← `($[$doc?]? $[$attrs?]? $[$vis?]? noncomputable $[unsafe%$uTk?]? opaque $id $[$bs]* : $ty)
   withMacroExpansion (← getRef) cmd <| elabCommand cmd
   let bvs ← liftMacroM <| bs.concatMapM matchBinder
-  elabExternImpl exTk sym? ⟨id.raw[0]⟩ bvs ty (packBody stmts)
+  elabExternImplCpp exTk sym? ⟨id.raw[0]⟩ bvs ty (packBody stmts)
