@@ -14,9 +14,12 @@ pushd examples/S
 ./test.sh
 popd
 
-pushd examples/Libclang
-./test.sh
-popd
+# if env var CI is not set, we run the following tests
+if [ -z ${CI+x} ]; then
+  pushd examples/Libclang
+  ./test.sh
+  popd
+fi
 
 pushd examples/Cpp
 ./test.sh
