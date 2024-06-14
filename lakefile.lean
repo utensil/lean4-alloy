@@ -42,7 +42,7 @@ module_facet alloy.c mod : FilePath := do
   let oFile := mod.irPath s!"alloy.c.o.{if shouldExport then "export" else "noexport"}"
   let cJob ← fetch <| mod.facet `alloy.c
   let weakArgs := #["-I", (← getLeanIncludeDir).toString] ++ mod.weakLeancArgs
-  let cc := (← IO.getEnv "CC").getD "cc"
+  let cc := (← IO.getEnv "CC").getD "clang"
   let leancArgs := if shouldExport then mod.leancArgs.push "-DLEAN_EXPORTING" else mod.leancArgs
   buildO oFile cJob weakArgs leancArgs cc
 
