@@ -83,5 +83,4 @@ jobs:
       shell: msys2 {0}
       run: |
         env
-        lake env
-        # LAKE="lake env lake" ./test.sh
+        ./test.sh
