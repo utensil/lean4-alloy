@@ -11,4 +11,3 @@ $LAKE build Test -v
 # $LAKE exe clangp
 
 .lake/build/bin/s
-./build/bin/clangp
