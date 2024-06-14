@@ -1,5 +1,5 @@
 set -ex
-rm -rf build
+rm -rf .lake
 LAKE=${LAKE:-lake}
 $LAKE build -U
 $LAKE build Test -v
@@ -10,4 +10,5 @@ $LAKE build Test -v
 
 # $LAKE exe clangp
 
+.lake/build/bin/s
 ./build/bin/clangp

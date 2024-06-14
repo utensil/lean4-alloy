@@ -78,10 +78,10 @@ def decodeShimTokens
     let shimPos := shim.text.lspPosToUtf8Pos ⟨line, char⟩
     let some pos := shim.shimPosToLeanStx? shimPos >>= (·.getPos?)
       | continue -- Ditto
-    let shimTailPos := shim.text.source.prev <|
+    let shimTailPos :=
       shim.text.source.codepointPosToUtf8PosFrom shimPos <|
       shim.text.source.utf16PosToCodepointPosFrom len shimPos
-    let some tailPos := shim.shimPosToLeanStx? shimTailPos >>= (·.getTailPos?)
+    let some tailPos := shim.shimPosToLeanStx? shimTailPos (includeStop := true) >>= (·.getTailPos?)
       | continue
     unless pos < tailPos && beginPos ≤ pos && tailPos ≤ endPos do
       continue
@@ -101,17 +101,16 @@ def handleSemanticTokens
 (beginPos endPos : String.Pos) (prev : RequestTask SemanticTokens)
 : RequestM (RequestTask SemanticTokens) := do
   let doc ← readDoc
-  let afterEnd snap := snap.isAtEnd || snap.beginPos > endPos
+  let afterEnd snap := snap.isAtEnd || snap.endPos ≥ endPos
   bindWaitFindSnap doc afterEnd (notFoundX := pure prev) fun snap => do
     let shim := getLocalShim snap.env
     if shim.isEmpty then return prev
-    let some ls ← getLs? | return prev
+    let some ls ← getLs? snap.env | return prev
     let some provider := ls.capabilities.semanticTokensProvider? | return prev
     let {tokenTypes, tokenModifiers} := provider.legend
     withFallbackResponse prev do
-      let task ←
-        ls.withTextDocument nullUri shim.toString "c" do
-          ls.call "textDocument/semanticTokens/full" ⟨⟨nullUri⟩⟩
+      ls.setShimDocument doc.meta.version shim.toString "c"
+      let task ← ls.call "textDocument/semanticTokens/full" ⟨⟨nullUri⟩⟩
       mergeResponses task prev fun shimTokens leanTokens =>
         let shimEntries := decodeShimTokens shimTokens.data
           shim doc.meta.text beginPos endPos tokenTypes tokenModifiers
@@ -137,7 +136,7 @@ def handleSemanticTokens
 def handleSemanticTokensFull
 (_ : SemanticTokensParams) (prev : RequestTask SemanticTokens)
 : RequestM (RequestTask SemanticTokens) := do
-  handleSemanticTokens 0 ⟨1 <<< 31⟩ prev
+  handleSemanticTokens 0 (← readDoc).meta.text.source.endPos prev
 
 def handleSemanticTokensRange
 (p : SemanticTokensRangeParams) (prev : RequestTask SemanticTokens)

@@ -47,9 +47,9 @@ where
   go stx :=
     withRef stx <| withIncRecDepth <| withFreshMacroScope do
       withTraceNode `ShimElab.step (fun _ => return stx) do
-        liftCoreM <| checkMaxHeartbeats "elaborator"
+        liftCoreM <| checkSystem "elaborator"
         if let some (decl, stxNew?) ← liftMacroM <| expandMacroImpl? (← getEnv) stx then
-          withInfoTreeContext (mkInfoTree := mkInfoTree decl stx) do
+          withInfoTreeContext (mkInfoTree := mkCommandElabInfoTree decl stx) do
             let stxNew ← liftMacroM <| liftExcept stxNew?
             withMacroExpansion stx stxNew do
               go stxNew
@@ -62,7 +62,8 @@ def elabSyntaxUsing? (stx : Syntax) : List (KeyedDeclsAttribute.AttributeEntry (
 | (elabFn::elabFns) => do
   let s ← get
   catchInternalId unsupportedSyntaxExceptionId
-    (withInfoTreeContext (mkInfoTree := mkInfoTree elabFn.declName stx) <| elabFn.value stx)
+    (withInfoTreeContext (mkInfoTree := mkCommandElabInfoTree elabFn.declName stx) do
+      elabFn.value stx)
     (fun _ => do set s; elabSyntaxUsing? stx elabFns)
 
 /-- Elaborate some shim code and return the produced syntax. -/
@@ -70,11 +71,11 @@ partial def elabShimSyntaxCore (ext : ModuleEnvExtension Shim) (stx : Syntax) : 
   elabSyntaxWith stx fun
   | .atom info val => do
     let code := reprintLeaf val info
-    modifyEnv (ext.modifyState · (·.addCode code))
+    modifyEnv (ext.modifyState · (·.addCodeSnippet code))
     return stx
   | .ident info rawVal _ _ => do
     let code := reprintLeaf rawVal.toString info
-    modifyEnv (ext.modifyState · (·.addCode code))
+    modifyEnv (ext.modifyState · (·.addCodeSnippet code))
     return stx
   | .node _ kind args => do
     let elabFns := shimElabAttribute.getEntries (← getEnv) kind

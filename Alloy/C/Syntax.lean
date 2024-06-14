@@ -37,6 +37,7 @@ abbrev Initializer := TSyntax `cInitializer
 abbrev Expr := TSyntax `cExpr
 abbrev AssignOp := TSyntax `cAssignOp
 abbrev Stmt := TSyntax `cStmt
+abbrev StmtLike := TSyntax `cStmtLike
 
 /-! ### Kinds -/
 
@@ -45,14 +46,17 @@ abbrev AlignSpec := TSyntax ``alignSpec
 abbrev ParamDecl := TSyntax ``paramDecl
 abbrev Params := TSyntax ``params
 abbrev Function := TSyntax ``function
+abbrev InitializerElem := TSyntax ``initializerElem
 abbrev Declarator := TSyntax ``declarator
 abbrev AbsDeclarator := TSyntax ``absDeclarator
+abbrev InitDeclarator := TSyntax ``initDeclarator
 abbrev AggrDeclarator := TSyntax ``aggrDeclarator
 abbrev AggrSig := TSyntax ``aggrSig
 abbrev Enumerator := TSyntax ``enumerator
 abbrev EnumSig := TSyntax ``enumSig
 abbrev Declaration := TSyntax ``declaration
 abbrev CompStmt := TSyntax ``compStmt
+abbrev LabelStmt := TSyntax ``labelStmt
 abbrev ConstExpr := TSyntax ``constExpr
 
 /-! ### Coercions -/
@@ -84,6 +88,9 @@ instance : Coe Expr ConstExpr where
 instance : Coe Expr Initializer where
   coe x := Unhygienic.run `(cInitializer| $x:cExpr)
 
+instance : Coe Initializer InitializerElem where
+  coe x := Unhygienic.run `(initializerElem| $x:cInitializer)
+
 instance : Coe Expr Index where
   coe x := Unhygienic.run `(cIndex| $x:cExpr)
 
@@ -98,6 +105,9 @@ instance : Coe Ident DirectDeclarator where
 
 instance : Coe DirectDeclarator Declarator where
   coe x := Unhygienic.run `(declarator| $x:cDirectDeclarator)
+
+instance : Coe Declarator InitDeclarator where
+  coe x := Unhygienic.run `(initDeclarator| $x:declarator)
 
 instance : Coe Declarator AggrDeclarator where
   coe x := Unhygienic.run `(aggrDeclarator| $x:declarator)
@@ -132,8 +142,20 @@ instance : Coe StorageClassSpec DeclSpec where
 instance : Coe FunSpec DeclSpec where
   coe x := Unhygienic.run `(cDeclSpec| $x:cFunSpec)
 
+instance : Coe DeclSpec ParamDecl where
+  coe x := Unhygienic.run `(paramDecl|$x:cDeclSpec)
+
+instance : Coe Stmt StmtLike where
+  coe x := Unhygienic.run `(cStmtLike| $x:cStmt)
+
+instance : Coe Declaration StmtLike where
+  coe x := Unhygienic.run `(cStmtLike| $x:declaration)
+
 instance : Coe CompStmt Stmt where
   coe x := Unhygienic.run `(cStmt| $x:compStmt)
+
+instance : Coe LabelStmt Stmt where
+  coe x := Unhygienic.run `(cStmt| $x:labelStmt)
 
 instance : Coe Function ExternDecl where
   coe x := Unhygienic.run `(cExternDecl| $x:function)
@@ -151,6 +173,10 @@ instance : Coe PPCmd Cmd where
 ## Other Helpers
 -/
 
-def packBody : Stmt → CompStmt
-| `(cStmt| $x:compStmt) => x
-| stmt => Unhygienic.run `(compStmt| {$stmt:cStmt})
+def packBody (stmts : Array StmtLike) : CompStmt :=
+  if h : 0 < stmts.size then
+    match stmts[0]'h with
+    | `(cStmtLike| $x:compStmt) => x
+    | _ => Unhygienic.run `(compStmt| {$stmts*})
+  else
+    Unhygienic.run `(compStmt| {$stmts*})
