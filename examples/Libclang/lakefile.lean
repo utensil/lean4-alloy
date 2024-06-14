@@ -21,11 +21,16 @@ export DYLD_PRINT_WARNINGS=0
 
 require alloy from ".."/".."
 
-module_data alloy.c.o : BuildJob FilePath
+module_data alloy.c.o.export : BuildJob FilePath
+module_data alloy.c.o.noexport : BuildJob FilePath
 
 lean_lib Libclang {
   precompileModules := true
-  nativeFacets := #[Module.oFacet, `alloy.c.o]
+  nativeFacets := fun shouldExport =>
+    if shouldExport then
+      #[Module.oExportFacet, `alloy.c.o.export]
+    else
+      #[Module.oNoExportFacet, `alloy.c.o.noexport]
   moreLeancArgs := #[s!"-I/opt/homebrew/opt/llvm/include"] -- FIXME: for mac only now
   moreLinkArgs := #[s!"-L/opt/homebrew/opt/llvm/lib"] -- FIXME: for mac only now
 }
@@ -36,4 +41,3 @@ lean_lib Test
 lean_exe clangp {
   root := `Main
 }
-

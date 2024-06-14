@@ -52,7 +52,7 @@ static void CXIndex_finalize(void* ptr) {
 
 end
 
-alloy c extern_type Index => Index := {
+alloy c opaque_extern_type Index => Index := {
   foreach := `noop_foreach
   finalize := `CXIndex_finalize
 }
@@ -75,7 +75,7 @@ static void CXTranslationUnit_finalize(void* ptr) {
 
 end
 
-alloy c extern_type TranslationUnit => TranslationUnit := {
+alloy c opaque_extern_type TranslationUnit => TranslationUnit := {
   foreach := `noop_foreach
   finalize := `CXTranslationUnit_finalize
 }
@@ -107,5 +107,3 @@ def TranslationUnit.save (tu : @&TranslationUnit) (filename : @&String) : UInt32
     CXSaveTranslationUnit_None
   );
 }
-
-
