@@ -5,8 +5,8 @@ package Libclang where
   buildType := .debug
   moreLinkArgs := #[s!"-L{__dir__}/.lake/build/lib", s!"-L/opt/homebrew/opt/llvm/lib", "-lclang"]
   weakLeanArgs := #[
-    s!"--load-dynlib=/opt/homebrew/opt/llvm/lib/" ++ nameToSharedLib "LLVM",
-    s!"--load-dynlib=/opt/homebrew/opt/llvm/lib/" ++ nameToSharedLib "clang"
+    s!"--load-dynlib=/opt/homebrew/opt/llvm/lib/" ++ nameToSharedLib "clang",
+    s!"--load-dynlib=/opt/homebrew/opt/llvm/lib/" ++ nameToSharedLib "LLVM"
   ]
 
 /-
@@ -38,6 +38,6 @@ lean_lib Libclang {
 lean_lib Test
 
 @[default_target]
-lean_exe clangp {
+lean_exe clangp where
   root := `Main
-}
+  supportInterpreter := true
