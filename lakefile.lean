@@ -57,7 +57,7 @@ module_facet alloy.cpp mod : FilePath := do
   modJob.bindSync fun _ modTrace => do
     let depTrace := exeTrace.mix modTrace
     let trace ← buildFileUnlessUpToDate cppFile depTrace do
-      logStep s!"Generating {mod.name} alloy"
+      logVerbose s!"Generating {mod.name} alloy"
       proc {
         cmd := exeFile.toString
         args := #[mod.name.toString, cppFile.toString]
@@ -65,8 +65,13 @@ module_facet alloy.cpp mod : FilePath := do
       }
     return (cppFile, trace)
 
-module_facet alloy.cpp.o mod : FilePath := do
-  let oFile := mod.irPath "alloy.cpp.o"
+@[inline] def buildAlloyCppO (mod : Module) (shouldExport : Bool) : FetchM (BuildJob FilePath) := do
+  let oFile := mod.irPath s!"alloy.cpp.o.{if shouldExport then "export" else "noexport"}"
   let cJob ← fetch <| mod.facet `alloy.cpp
-  let weakArgs := #["-I", (← getLeanIncludeDir).toString, "-v"]
-  buildO s!"{mod.name} alloy" oFile cJob weakArgs mod.leancArgs "clang++"
+  let weakArgs := #["-I", (← getLeanIncludeDir).toString, "-v"] ++ mod.weakLeancArgs
+  let cc := (← IO.getEnv "CXX").getD "clang++"
+  let leancArgs := if shouldExport then mod.leancArgs.push "-DLEAN_EXPORTING" else mod.leancArgs
+  buildO oFile cJob weakArgs leancArgs cc
+
+module_facet alloy.cpp.o.export mod : FilePath := buildAlloyCppO mod true
+module_facet alloy.cpp.o.noexport mod : FilePath :=  buildAlloyCppO mod false
